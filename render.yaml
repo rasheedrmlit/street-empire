@@ -2,8 +2,11 @@ services:
   - type: web
     name: street-empire
     runtime: node
+    plan: free
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
