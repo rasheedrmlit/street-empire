@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STREET EMPIRE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --neon-green: #00ff88;
+    --neon-pink: #ff0066;
+    --neon-blue: #00d4ff;
+    --neon-purple: #b700ff;
+    --neon-yellow: #ffcc00;
+    --neon-red: #ff3333;
+    --bg-dark: #0a0a0f;
+    --bg-card: rgba(15, 15, 25, 0.9);
+    --bg-card-hover: rgba(25, 25, 45, 0.95);
+    --border-dim: rgba(0, 255, 136, 0.15);
+    --border-bright: rgba(0, 255, 136, 0.4);
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --text-normal: rgba(255, 255, 255, 0.85);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-dark);
+    color: var(--text-normal);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridScroll 20s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  @keyframes gridScroll {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+  }
+
+  /* Scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.08) 2px,
+      rgba(0, 0, 0, 0.08) 4px
+    );
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* ── TITLE SCREEN ── */
+  #title-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    animation: fadeIn 1s ease;
+  }
+
+  .title-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.3));
+    letter-spacing: 8px;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  @keyframes titlePulse {
+    0%, 100% { filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.3)); }
+    50% { filter: drop-shadow(0 0 60px rgba(0, 255, 136, 0.6)); }
+  }
+
+  .title-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    color: var(--neon-green);
+    margin-top: 10px;
+    opacity: 0.7;
+    letter-spacing: 4px;
+  }
+
+  .title-tagline {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    margin-top: 30px;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 14px 40px;
+    border: 2px solid var(--neon-green);
+    background: transparent;
+    color: var(--neon-green);
+    cursor: pointer;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-top: 40px;
+  }
+
+  .btn:hover {
+    background: var(--neon-green);
+    color: var(--bg-dark);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.4), inset 0 0 30px rgba(0, 255, 136, 0.1);
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -100%;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-green));
+    animation: btnScan 2s linear infinite;
+  }
+
+  @keyframes btnScan {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .btn-danger {
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+  }
+  .btn-danger:hover {
+    background: var(--neon-red);
+    color: #fff;
+    box-shadow: 0 0 30px rgba(255, 51, 51, 0.4);
+  }
+
+  .btn-pink {
+    border-color: var(--neon-pink);
+    color: var(--neon-pink);
+  }
+  .btn-pink:hover {
+    background: var(--neon-pink);
+    color: #fff;
+    box-shadow: 0 0 30px rgba(255, 0, 102, 0.4);
+  }
+
+  .btn-blue {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+  }
+  .btn-blue:hover {
+    background: var(--neon-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 8px 16px;
+    margin-top: 0;
+    letter-spacing: 1px;
+  }
+
+  /* ── HUD ── */
+  #game-screen { display: none; animation: fadeIn 0.5s ease; }
+
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+
+  .hud-item {
+    text-align: center;
+  }
+
+  .hud-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .hud-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    margin-top: 4px;
+  }
+
+  .hud-value.cash { color: var(--neon-green); }
+  .hud-value.debt { color: var(--neon-red); }
+  .hud-value.health { color: var(--neon-blue); }
+  .hud-value.day { color: var(--neon-yellow); }
+  .hud-value.rep { color: var(--neon-purple); }
+  .hud-value.bank { color: var(--neon-blue); }
+
+  .health-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .health-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-red), var(--neon-green));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── CITY HEADER ── */
+  .city-header {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .city-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue), var(--neon-purple), var(--neon-pink));
+    animation: rainbowSlide 3s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  @keyframes rainbowSlide {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .city-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+  }
+
+  .city-flavor {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px 8px 0 0;
+    color: var(--text-dim);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .tab:hover { color: var(--neon-green); border-color: var(--border-bright); }
+  .tab.active {
+    color: var(--neon-green);
+    border-color: var(--neon-green);
+    border-bottom: none;
+    background: var(--bg-card-hover);
+    box-shadow: 0 -2px 15px rgba(0, 255, 136, 0.1);
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 0 0 12px 12px;
+    padding: 20px;
+    animation: slideUp 0.3s ease;
+  }
+  .panel.active { display: block; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MARKET TABLE ── */
+  .market-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .market-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .market-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 0.95rem;
+    vertical-align: middle;
+  }
+
+  .market-table tr {
+    transition: all 0.2s ease;
+  }
+
+  .market-table tr:hover {
+    background: rgba(0, 255, 136, 0.03);
+  }
+
+  .drug-name {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .drug-emoji {
+    font-size: 1.3rem;
+    margin-right: 8px;
+  }
+
+  .price-up { color: var(--neon-red); }
+  .price-down { color: var(--neon-green); }
+  .price-neutral { color: var(--text-dim); }
+
+  .trend-arrow {
+    font-size: 0.8rem;
+    margin-left: 6px;
+  }
+
+  .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .qty-input {
+    width: 60px;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    color: var(--neon-green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+  }
+
+  .qty-input:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+  }
+
+  .max-btn {
+    font-size: 0.6rem;
+    padding: 4px 8px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    color: var(--neon-green);
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .max-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: var(--neon-green);
+  }
+
+  /* ── TRAVEL ── */
+  .city-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .city-card {
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-dim);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .city-card:hover {
+    border-color: var(--neon-green);
+    background: rgba(0, 255, 136, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.15);
+  }
+
+  .city-card.current {
+    border-color: var(--neon-yellow);
+    background: rgba(255, 204, 0, 0.05);
+  }
+
+  .city-card-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+
+  .city-card-flavor {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .city-heat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .heat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .heat-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .heat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .heat-dot.active {
+    background: var(--neon-red);
+    box-shadow: 0 0 6px rgba(255, 51, 51, 0.5);
+  }
+
+  /* ── LOAN SHARK ── */
+  .shark-section {
+    text-align: center;
+    padding: 30px;
+  }
+
+  .shark-ascii {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--neon-red);
+    white-space: pre;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    animation: sharkGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes sharkGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(255, 51, 51, 0.3); }
+    50% { text-shadow: 0 0 20px rgba(255, 51, 51, 0.6); }
+  }
+
+  .shark-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .shark-stat {
+    padding: 16px;
+    background: rgba(255, 0, 0, 0.05);
+    border: 1px solid rgba(255, 51, 51, 0.2);
+    border-radius: 10px;
+  }
+
+  .shark-stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--neon-red);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.7;
+  }
+
+  .shark-stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--neon-red);
+    margin-top: 6px;
+  }
+
+  .shark-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .shark-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .shark-input {
+    width: 150px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 51, 51, 0.3);
+    border-radius: 8px;
+    color: var(--neon-red);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+  }
+
+  .shark-input:focus {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+  }
+
+  /* ── STASH (Inventory) ── */
+  .stash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .stash-item {
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-dim);
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stash-item:hover {
+    border-color: var(--neon-green);
+  }
+
+  .stash-item.has-stock {
+    border-color: rgba(0, 255, 136, 0.3);
+    background: rgba(0, 255, 136, 0.03);
+  }
+
+  .stash-emoji { font-size: 2rem; }
+  .stash-name {
+    font-weight: 700;
+    margin-top: 6px;
+    font-size: 0.9rem;
+  }
+  .stash-qty {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    margin-top: 4px;
+  }
+  .stash-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .stash-capacity {
+    text-align: center;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+  }
+
+  .capacity-bar-wrap {
+    width: 100%;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .capacity-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-yellow));
+    border-radius: 5px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── EVENT OVERLAY ── */
+  .event-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(5px);
+  }
+
+  .event-card {
+    background: var(--bg-dark);
+    border: 2px solid var(--neon-red);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    animation: eventSlam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .event-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(255, 0, 0, 0.1), transparent, rgba(255, 0, 0, 0.05), transparent);
+    animation: eventSpin 4s linear infinite;
+  }
+
+  @keyframes eventSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .event-card > * { position: relative; z-index: 1; }
+
+  .event-card.good { border-color: var(--neon-green); }
+  .event-card.good::before {
+    background: conic-gradient(from 0deg, transparent, rgba(0, 255, 136, 0.1), transparent, rgba(0, 255, 136, 0.05), transparent);
+  }
+
+  .event-card.info { border-color: var(--neon-blue); }
+  .event-card.info::before {
+    background: conic-gradient(from 0deg, transparent, rgba(0, 212, 255, 0.1), transparent, rgba(0, 212, 255, 0.05), transparent);
+  }
+
+  @keyframes eventSlam {
+    0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .event-type {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+    color: var(--neon-red);
+    text-transform: uppercase;
+  }
+  .event-card.good .event-type { color: var(--neon-green); }
+  .event-card.info .event-type { color: var(--neon-blue); }
+
+  .event-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 16px 0;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .event-message {
+    font-size: 1.05rem;
+    color: var(--text-normal);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .event-result {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--neon-yellow);
+    margin: 16px 0;
+    padding: 12px;
+    background: rgba(255, 204, 0, 0.05);
+    border: 1px solid rgba(255, 204, 0, 0.2);
+    border-radius: 8px;
+  }
+
+  /* ── TRAVEL ANIMATION ── */
+  .travel-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .travel-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--neon-green);
+    letter-spacing: 4px;
+    animation: travelPulse 0.8s ease-in-out infinite;
+  }
+
+  @keyframes travelPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .travel-road {
+    margin-top: 30px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    color: var(--text-dim);
+    letter-spacing: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: roadScroll 0.6s linear infinite;
+  }
+
+  @keyframes roadScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-20px); }
+  }
+
+  .travel-car {
+    font-size: 3rem;
+    margin-top: 20px;
+    animation: carBounce 0.3s ease-in-out infinite;
+  }
+
+  @keyframes carBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* ── GAME OVER ── */
+  #gameover-screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeIn 1s ease;
+  }
+
+  .gameover-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+  }
+
+  .gameover-score {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    margin: 20px 0;
+  }
+
+  .gameover-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    max-width: 600px;
+    margin: 30px auto;
+  }
+
+  .gameover-stat {
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 10px;
+  }
+
+  .gameover-stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .gameover-stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    margin-top: 4px;
+  }
+
+  .high-scores {
+    margin-top: 30px;
+    max-width: 400px;
+    width: 100%;
+  }
+
+  .high-scores-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    color: var(--neon-yellow);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+  }
+
+  .high-score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .high-score-rank { color: var(--neon-yellow); width: 30px; }
+  .high-score-name { color: var(--text-normal); flex: 1; }
+  .high-score-val { color: var(--neon-green); }
+
+  /* ── MESSAGE BAR ── */
+  .message-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--neon-green);
+    border-radius: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--neon-green);
+    z-index: 500;
+    animation: msgSlide 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+  }
+
+  .message-bar.error {
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+  }
+
+  @keyframes msgSlide {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  /* ── SPARKLE ── */
+  .sparkle {
+    position: fixed;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    pointer-events: none;
+    z-index: 10000;
+    animation: sparkleFade 0.6s ease forwards;
+  }
+
+  @keyframes sparkleFade {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0) translateY(-20px); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .title-logo { font-size: 2.5rem; letter-spacing: 4px; }
+    .city-name { font-size: 1.3rem; }
+    .hud { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
+    .hud-value { font-size: 1rem; }
+    .market-table { font-size: 0.85rem; }
+    .shark-stats { grid-template-columns: 1fr; }
+    .tab { font-size: 0.6rem; padding: 10px 4px; letter-spacing: 1px; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── Bank section ── */
+  .bank-section {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .bank-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .bank-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bank-input {
+    width: 150px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    color: var(--neon-blue);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+  }
+
+  .bank-input:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  }
+
+  /* ── Mini chart ── */
+  .mini-chart {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 20px;
+    vertical-align: middle;
+  }
+
+  .mini-chart-bar {
+    width: 3px;
+    background: var(--neon-green);
+    border-radius: 1px;
+    opacity: 0.6;
+    transition: height 0.3s ease;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══ TITLE SCREEN ═══ -->
+  <div id="title-screen">
+    <div class="title-logo">STREET<br>EMPIRE</div>
+    <div class="title-sub">A SURVIVAL TRADING GAME</div>
+    <div class="title-tagline">
+      You've got 30 days, $2,000 cash, and a $5,000 debt to the loan shark.
+      Travel between 10 U.S. cities, buy low, sell high, and try not to die.
+      Interest compounds daily. The clock is ticking.
+    </div>
+    <button class="btn" onclick="startGame()">START HUSTLING</button>
+    <div style="margin-top: 30px;" id="title-high-scores"></div>
+  </div>
+
+  <!-- ═══ GAME SCREEN ═══ -->
+  <div id="game-screen">
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-item">
+        <div class="hud-label">Cash</div>
+        <div class="hud-value cash" id="hud-cash">$2,000</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Bank</div>
+        <div class="hud-value bank" id="hud-bank">$0</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Debt</div>
+        <div class="hud-value debt" id="hud-debt">$5,000</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Day</div>
+        <div class="hud-value day" id="hud-day">1 / 30</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Health</div>
+        <div class="hud-value health" id="hud-health">100</div>
+        <div class="health-bar-wrap"><div class="health-bar" id="health-bar" style="width:100%"></div></div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Rep</div>
+        <div class="hud-value rep" id="hud-rep">0</div>
+      </div>
+    </div>
+
+    <!-- City Header -->
+    <div class="city-header">
+      <div class="city-name" id="city-name">MIAMI</div>
+      <div class="city-flavor" id="city-flavor">Vice City vibes. Product flows through the port like water.</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="market" onclick="switchTab('market')">Market</div>
+      <div class="tab" data-tab="stash" onclick="switchTab('stash')">Stash</div>
+      <div class="tab" data-tab="travel" onclick="switchTab('travel')">Travel</div>
+      <div class="tab" data-tab="shark" onclick="switchTab('shark')">Loan Shark</div>
+      <div class="tab" data-tab="bank" onclick="switchTab('bank')">Bank</div>
+    </div>
+
+    <!-- Market Panel -->
+    <div class="panel active" id="panel-market">
+      <table class="market-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Trend</th>
+            <th>Owned</th>
+            <th>Qty</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="market-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Stash Panel -->
+    <div class="panel" id="panel-stash">
+      <div class="stash-capacity">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim);letter-spacing:2px;">
+          STASH CAPACITY: <span id="stash-count">0</span> / <span id="stash-limit">100</span>
+        </span>
+        <div class="capacity-bar-wrap"><div class="capacity-bar" id="capacity-bar" style="width:0%"></div></div>
+      </div>
+      <div class="stash-grid" id="stash-grid"></div>
+    </div>
+
+    <!-- Travel Panel -->
+    <div class="panel" id="panel-travel">
+      <div style="text-align:center;margin-bottom:16px;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim);letter-spacing:2px;">
+          TRAVELING USES 1 DAY. DEBT INTEREST COMPOUNDS EACH DAY.
+        </span>
+      </div>
+      <div class="city-grid" id="city-grid"></div>
+    </div>
+
+    <!-- Loan Shark Panel -->
+    <div class="panel" id="panel-shark">
+      <div class="shark-section">
+        <div class="shark-ascii">
+    ╔══════════════════════════════════════╗
+    ║     💀  THE LOAN SHARK  💀          ║
+    ║   "You know what happens if you     ║
+    ║    don't pay me back, right?"        ║
+    ╚══════════════════════════════════════╝
+        </div>
+        <div class="shark-stats">
+          <div class="shark-stat">
+            <div class="shark-stat-label">Your Debt</div>
+            <div class="shark-stat-value" id="shark-debt">$5,000</div>
+          </div>
+          <div class="shark-stat">
+            <div class="shark-stat-label">Interest Rate</div>
+            <div class="shark-stat-value" id="shark-rate">10%</div>
+          </div>
+          <div class="shark-stat">
+            <div class="shark-stat-label">Max Credit</div>
+            <div class="shark-stat-value" id="shark-max">$50,000</div>
+          </div>
+        </div>
+        <div class="shark-actions">
+          <div class="shark-action">
+            <input type="number" class="shark-input" id="repay-input" placeholder="Amount">
+            <button class="btn btn-danger btn-sm" onclick="doRepay()">REPAY DEBT</button>
+            <button class="max-btn" onclick="document.getElementById('repay-input').value=Math.min(game.cash,game.debt)">MAX</button>
+          </div>
+          <div class="shark-action">
+            <input type="number" class="shark-input" id="borrow-input" placeholder="Amount">
+            <button class="btn btn-danger btn-sm" onclick="doBorrow()">BORROW</button>
+            <button class="max-btn" onclick="document.getElementById('borrow-input').value=50000-game.debt">MAX</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bank Panel -->
+    <div class="panel" id="panel-bank">
+      <div class="bank-section">
+        <h2 style="font-family:'Orbitron',sans-serif;color:var(--neon-blue);letter-spacing:4px;margin-bottom:6px;">OFFSHORE BANK</h2>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-dim);">
+          Stash your cash where the cops can't touch it. No interest, but safe from muggings.
+        </p>
+        <div class="shark-stats" style="margin-top:20px;">
+          <div class="shark-stat" style="border-color:rgba(0,212,255,0.2);background:rgba(0,212,255,0.03);">
+            <div class="shark-stat-label" style="color:var(--neon-blue);">Cash On Hand</div>
+            <div class="shark-stat-value" style="color:var(--neon-blue);" id="bank-cash">$2,000</div>
+          </div>
+          <div class="shark-stat" style="border-color:rgba(0,212,255,0.2);background:rgba(0,212,255,0.03);">
+            <div class="shark-stat-label" style="color:var(--neon-blue);">Bank Balance</div>
+            <div class="shark-stat-value" style="color:var(--neon-blue);" id="bank-balance">$0</div>
+          </div>
+          <div class="shark-stat" style="border-color:rgba(0,212,255,0.2);background:rgba(0,212,255,0.03);">
+            <div class="shark-stat-label" style="color:var(--neon-blue);">Net Worth</div>
+            <div class="shark-stat-value" style="color:var(--neon-blue);" id="bank-net">$-3,000</div>
+          </div>
+        </div>
+        <div class="bank-actions">
+          <div class="bank-action">
+            <input type="number" class="bank-input" id="deposit-input" placeholder="Amount">
+            <button class="btn btn-blue btn-sm" onclick="doDeposit()">DEPOSIT</button>
+            <button class="max-btn" style="color:var(--neon-blue);background:rgba(0,212,255,0.1);" onclick="document.getElementById('deposit-input').value=game.cash">MAX</button>
+          </div>
+          <div class="bank-action">
+            <input type="number" class="bank-input" id="withdraw-input" placeholder="Amount">
+            <button class="btn btn-blue btn-sm" onclick="doWithdraw()">WITHDRAW</button>
+            <button class="max-btn" style="color:var(--neon-blue);background:rgba(0,212,255,0.1);" onclick="document.getElementById('withdraw-input').value=game.bank">MAX</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GAME OVER SCREEN ═══ -->
+  <div id="gameover-screen">
+    <div class="gameover-title">GAME OVER</div>
+    <div id="gameover-reason" style="color:var(--text-dim);margin-top:10px;font-size:1.1rem;"></div>
+    <div class="gameover-score" id="gameover-score">$0</div>
+    <div class="gameover-stats" id="gameover-stats"></div>
+    <div class="high-scores" id="gameover-high-scores"></div>
+    <button class="btn" style="margin-top:30px;" onclick="location.reload()">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+<script>
+// ============================================================
+// UI Controller
+// ============================================================
+
+let game;
+const GE = window.GameEngine;
+
+function startGame() {
+  game = GE.createGame();
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+  updateUI();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${name}"]`).classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+
+  if (name === 'stash') renderStash();
+  if (name === 'travel') renderTravel();
+  if (name === 'shark') updateShark();
+  if (name === 'bank') updateBank();
+}
+
+// ── Update all UI elements ──
+function updateUI() {
+  // HUD
+  document.getElementById('hud-cash').textContent = `$${game.cash.toLocaleString()}`;
+  document.getElementById('hud-bank').textContent = `$${game.bank.toLocaleString()}`;
+  document.getElementById('hud-debt').textContent = `$${game.debt.toLocaleString()}`;
+  document.getElementById('hud-day').textContent = `${game.day} / ${game.maxDays}`;
+  document.getElementById('hud-health').textContent = game.health;
+  document.getElementById('hud-rep').textContent = game.reputation.toLocaleString();
+  document.getElementById('health-bar').style.width = `${game.health}%`;
+
+  // City
+  document.getElementById('city-name').textContent = game.city.name.toUpperCase();
+  document.getElementById('city-flavor').textContent = game.city.flavor;
+
+  // Market
+  renderMarket();
+}
+
+function renderMarket() {
+  const tbody = document.getElementById('market-body');
+  tbody.innerHTML = '';
+
+  GE.DRUGS.forEach(drug => {
+    const price = game.prices[drug.name];
+    const history = game.priceHistory[drug.name];
+    const prev = history.length > 1 ? history[history.length - 2] : price;
+    const change = price - prev;
+    const trendClass = change > 0 ? 'price-up' : change < 0 ? 'price-down' : 'price-neutral';
+    const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '─';
+    const owned = game.inventory[drug.name] || 0;
+
+    // Mini chart
+    let chartHtml = '<div class="mini-chart">';
+    const maxP = Math.max(...history, 1);
+    history.forEach(p => {
+      const h = Math.max(2, (p / maxP) * 20);
+      chartHtml += `<div class="mini-chart-bar" style="height:${h}px"></div>`;
+    });
+    chartHtml += '</div>';
+
+    const maxBuy = Math.min(
+      Math.floor(game.cash / price),
+      game.inventoryLimit - GE.getInventoryCount(game)
+    );
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="drug-emoji">${drug.emoji}</span><span class="drug-name">${drug.name}</span></td>
+      <td style="font-family:'Orbitron',sans-serif;font-weight:700;color:var(--neon-green);">$${price.toLocaleString()}</td>
+      <td>${chartHtml} <span class="trend-arrow ${trendClass}">${arrow} ${Math.abs(change).toLocaleString()}</span></td>
+      <td style="font-family:'Share Tech Mono',monospace;color:${owned > 0 ? 'var(--neon-yellow)' : 'var(--text-dim)'};">${owned}</td>
+      <td>
+        <div class="qty-controls">
+          <input type="number" class="qty-input" id="qty-${drug.name}" value="1" min="1" max="${maxBuy + owned}">
+          <button class="max-btn" onclick="document.getElementById('qty-${drug.name}').value=${maxBuy}">MAX</button>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" onclick="doBuy('${drug.name}')">BUY</button>
+          <button class="btn btn-pink btn-sm" onclick="doSell('${drug.name}')">SELL</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderStash() {
+  const count = GE.getInventoryCount(game);
+  document.getElementById('stash-count').textContent = count;
+  document.getElementById('stash-limit').textContent = game.inventoryLimit;
+  document.getElementById('capacity-bar').style.width = `${(count / game.inventoryLimit) * 100}%`;
+
+  const grid = document.getElementById('stash-grid');
+  grid.innerHTML = '';
+
+  GE.DRUGS.forEach(drug => {
+    const qty = game.inventory[drug.name] || 0;
+    if (qty === 0) return;
+    const value = qty * game.prices[drug.name];
+    const div = document.createElement('div');
+    div.className = 'stash-item has-stock';
+    div.innerHTML = `
+      <div class="stash-emoji">${drug.emoji}</div>
+      <div class="stash-name">${drug.name}</div>
+      <div class="stash-qty">${qty}</div>
+      <div class="stash-value">Value: $${value.toLocaleString()}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  if (grid.children.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;color:var(--text-dim);grid-column:1/-1;padding:40px;font-family:Share Tech Mono,monospace;">Your stash is empty. Hit the market.</div>';
+  }
+}
+
+function renderTravel() {
+  const grid = document.getElementById('city-grid');
+  grid.innerHTML = '';
+
+  GE.CITIES.forEach((city, i) => {
+    const isCurrent = city.name === game.city.name;
+    const div = document.createElement('div');
+    div.className = `city-card${isCurrent ? ' current' : ''}`;
+    if (!isCurrent) {
+      div.onclick = () => doTravel(i);
+    }
+
+    let heatDots = '';
+    const heatLevel = Math.round(city.heat * 5);
+    for (let h = 0; h < 5; h++) {
+      heatDots += `<div class="heat-dot${h < heatLevel ? ' active' : ''}"></div>`;
+    }
+
+    div.innerHTML = `
+      <div class="city-card-name">${city.name}${isCurrent ? ' 📍' : ''}</div>
+      <div class="city-card-flavor">${city.flavor}</div>
+      <div class="city-heat">
+        <span class="heat-label">Heat</span>
+        <div class="heat-dots">${heatDots}</div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function updateShark() {
+  document.getElementById('shark-debt').textContent = `$${game.debt.toLocaleString()}`;
+  document.getElementById('shark-rate').textContent = `${(game.debtInterestRate * 100)}%`;
+  document.getElementById('shark-max').textContent = `$${(50000).toLocaleString()}`;
+}
+
+function updateBank() {
+  document.getElementById('bank-cash').textContent = `$${game.cash.toLocaleString()}`;
+  document.getElementById('bank-balance').textContent = `$${game.bank.toLocaleString()}`;
+  const net = game.cash + game.bank - game.debt;
+  document.getElementById('bank-net').textContent = `$${net.toLocaleString()}`;
+}
+
+// ── Actions ──
+function doBuy(drugName) {
+  const qty = parseInt(document.getElementById(`qty-${drugName}`).value) || 0;
+  if (qty <= 0) return showMessage("Enter a quantity.", true);
+  const result = GE.buyDrug(game, drugName, qty);
+  showMessage(result.msg, !result.success);
+  if (result.success) spawnSparkles();
+  updateUI();
+}
+
+function doSell(drugName) {
+  const qty = parseInt(document.getElementById(`qty-${drugName}`).value) || 0;
+  if (qty <= 0) return showMessage("Enter a quantity.", true);
+  const result = GE.sellDrug(game, drugName, qty);
+  showMessage(result.msg, !result.success);
+  if (result.success) spawnSparkles();
+  updateUI();
+}
+
+function doTravel(cityIndex) {
+  const destCity = GE.CITIES[cityIndex];
+
+  // Show travel animation
+  showTravelAnimation(destCity.name, () => {
+    const result = GE.travelTo(game, cityIndex);
+    if (!result.success) {
+      showMessage(result.msg, true);
+      return;
+    }
+
+    updateUI();
+
+    if (result.event) {
+      showEvent(result.event);
+    }
+
+    if (game.gameOver) {
+      setTimeout(() => endGame(), result.event ? 2000 : 500);
+    }
+  });
+}
+
+function doRepay() {
+  const amount = parseInt(document.getElementById('repay-input').value) || 0;
+  const result = GE.payDebt(game, amount);
+  showMessage(result.msg, !result.success);
+  document.getElementById('repay-input').value = '';
+  updateUI();
+  updateShark();
+}
+
+function doBorrow() {
+  const amount = parseInt(document.getElementById('borrow-input').value) || 0;
+  const result = GE.borrowMoney(game, amount);
+  showMessage(result.msg, !result.success);
+  document.getElementById('borrow-input').value = '';
+  updateUI();
+  updateShark();
+}
+
+function doDeposit() {
+  const amount = parseInt(document.getElementById('deposit-input').value) || 0;
+  const result = GE.depositBank(game, amount);
+  showMessage(result.msg, !result.success);
+  document.getElementById('deposit-input').value = '';
+  updateUI();
+  updateBank();
+}
+
+function doWithdraw() {
+  const amount = parseInt(document.getElementById('withdraw-input').value) || 0;
+  const result = GE.withdrawBank(game, amount);
+  showMessage(result.msg, !result.success);
+  document.getElementById('withdraw-input').value = '';
+  updateUI();
+  updateBank();
+}
+
+// ── Travel Animation ──
+function showTravelAnimation(cityName, callback) {
+  const overlay = document.createElement('div');
+  overlay.className = 'travel-overlay';
+  overlay.innerHTML = `
+    <div class="travel-text">TRAVELING TO ${cityName.toUpperCase()}</div>
+    <div class="travel-car">🚗</div>
+    <div class="travel-road">── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ──</div>
+  `;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.remove();
+    callback();
+  }, 1500);
+}
+
+// ── Event Overlay ──
+function showEvent(event) {
+  const goodTypes = ['find', 'price_crash', 'heal', 'tip'];
+  const infoTypes = ['tip', 'price_spike'];
+  const cardClass = goodTypes.includes(event.type) ? 'good' : infoTypes.includes(event.type) ? 'info' : '';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'event-overlay';
+  overlay.innerHTML = `
+    <div class="event-card ${cardClass}">
+      <div class="event-type">${event.type.replace('_', ' ')}</div>
+      <div class="event-title">${event.title}</div>
+      <div class="event-message">${event.message}</div>
+      <div class="event-result">${event.result}</div>
+      <button class="btn btn-sm" style="margin-top:20px;" onclick="this.closest('.event-overlay').remove(); updateUI();">CONTINUE</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// ── Message Bar ──
+let msgTimeout;
+function showMessage(msg, isError) {
+  const existing = document.querySelector('.message-bar');
+  if (existing) existing.remove();
+  clearTimeout(msgTimeout);
+
+  const div = document.createElement('div');
+  div.className = `message-bar${isError ? ' error' : ''}`;
+  div.textContent = msg;
+  document.body.appendChild(div);
+
+  msgTimeout = setTimeout(() => div.remove(), 3000);
+}
+
+// ── Sparkle Effect ──
+function spawnSparkles() {
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.left = `${Math.random() * window.innerWidth}px`;
+      s.style.top = `${Math.random() * window.innerHeight}px`;
+      s.style.background = ['var(--neon-green)', 'var(--neon-blue)', 'var(--neon-yellow)', 'var(--neon-pink)'][Math.floor(Math.random() * 4)];
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 600);
+    }, i * 50);
+  }
+}
+
+// ── Game Over ──
+function endGame() {
+  document.getElementById('game-screen').style.display = 'none';
+  const screen = document.getElementById('gameover-screen');
+  screen.style.display = 'flex';
+
+  const score = GE.calculateFinalScore(game);
+  const reason = game.health <= 0
+    ? "You didn't survive the streets."
+    : "Time's up. The shark is calling.";
+
+  document.getElementById('gameover-reason').textContent = reason;
+  document.getElementById('gameover-score').textContent = `NET WORTH: $${score.toLocaleString()}`;
+
+  const stats = document.getElementById('gameover-stats');
+  stats.innerHTML = `
+    <div class="gameover-stat"><div class="gameover-stat-label">Cash</div><div class="gameover-stat-value">$${game.cash.toLocaleString()}</div></div>
+    <div class="gameover-stat"><div class="gameover-stat-label">Bank</div><div class="gameover-stat-value">$${game.bank.toLocaleString()}</div></div>
+    <div class="gameover-stat"><div class="gameover-stat-label">Debt</div><div class="gameover-stat-value" style="color:var(--neon-red)">$${game.debt.toLocaleString()}</div></div>
+    <div class="gameover-stat"><div class="gameover-stat-label">Reputation</div><div class="gameover-stat-value" style="color:var(--neon-purple)">${game.reputation.toLocaleString()}</div></div>
+    <div class="gameover-stat"><div class="gameover-stat-label">Cities Visited</div><div class="gameover-stat-value">${game.stats.citiesVisited.size}</div></div>
+    <div class="gameover-stat"><div class="gameover-stat-label">Busted</div><div class="gameover-stat-value" style="color:var(--neon-red)">${game.stats.busts}x</div></div>
+  `;
+
+  // Prompt for name and save
+  const name = prompt("Enter your name for the leaderboard:", "Player") || "Player";
+  GE.saveHighScore(game, name);
+  renderHighScores('gameover-high-scores', game.highScores);
+}
+
+function renderHighScores(containerId, scores) {
+  const container = document.getElementById(containerId);
+  if (!scores || scores.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  let html = '<div class="high-scores-title">HALL OF FAME</div>';
+  scores.forEach((s, i) => {
+    html += `<div class="high-score-row">
+      <span class="high-score-rank">#${i + 1}</span>
+      <span class="high-score-name">${s.name}</span>
+      <span class="high-score-val">$${s.score.toLocaleString()}</span>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// Show high scores on title screen
+const existingScores = JSON.parse(localStorage.getItem('streetEmpireScores') || '[]');
+if (existingScores.length > 0) {
+  renderHighScores('title-high-scores', existingScores);
+}
+</script>
+</body>
+</html>
