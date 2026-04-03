@@ -43,7 +43,7 @@
       description: 'Grew up on the streets of Detroit. You know every alley, every shortcut, and every trick in the book.',
       startingCity: 'Detroit',
       stats: { charisma: 3, stealth: 9, intimidation: 5, streetSmarts: 9, stamina: 5 },
-      startingCash: 500,
+      startingCash: 5000,
       startingDebt: 5000,
       debtInterestRate: 0.05,
       bonuses: {
@@ -59,7 +59,7 @@
       description: 'Left university with a silver tongue and empty pockets. Your people skills open doors others never see.',
       startingCity: 'Seattle',
       stats: { charisma: 9, stealth: 5, intimidation: 3, streetSmarts: 6, stamina: 5 },
-      startingCash: 1000,
+      startingCash: 7500,
       startingDebt: 5000,
       debtInterestRate: 0.05,
       bonuses: {
@@ -74,7 +74,7 @@
       description: 'Dishonorably discharged but battle-hardened. Nobody wants to be on the wrong side of your temper.',
       startingCity: 'Houston',
       stats: { charisma: 3, stealth: 5, intimidation: 9, streetSmarts: 5, stamina: 9 },
-      startingCash: 500,
+      startingCash: 5000,
       startingDebt: 5000,
       debtInterestRate: 0.05,
       bonuses: {
@@ -89,7 +89,7 @@
       description: 'You caught the eye of a cartel lieutenant in Miami. Connections come at a price — your debt is steep.',
       startingCity: 'Miami',
       stats: { charisma: 6, stealth: 6, intimidation: 6, streetSmarts: 6, stamina: 6 },
-      startingCash: 500,
+      startingCash: 6000,
       startingDebt: 8000,
       debtInterestRate: 0.07,
       bonuses: {

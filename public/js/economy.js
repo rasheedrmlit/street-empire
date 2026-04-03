@@ -208,30 +208,71 @@
    * Generate market prices for all drugs for the current location / time.
    * Mutates game.prices and game.priceHistory.
    */
+  // City economy type → category price multipliers
+  // Each economy type makes certain drug categories cheaper or more expensive
+  var CITY_ECONOMY_MODS = {
+    'import-heavy':        { hard: 0.7,  soft: 1.0, party: 1.2, pharma: 0.9, psychedelic: 1.1 },  // Miami
+    'high-demand':         { hard: 1.3,  soft: 1.2, party: 1.4, pharma: 1.1, psychedelic: 1.2 },  // NYC
+    'entertainment-driven':{ hard: 1.1,  soft: 0.8, party: 1.5, pharma: 1.0, psychedelic: 1.3 },  // LA
+    'distribution-hub':    { hard: 1.0,  soft: 0.9, party: 0.9, pharma: 1.0, psychedelic: 1.0 },  // Chicago
+    'supply-rich':         { hard: 0.6,  soft: 0.7, party: 0.8, pharma: 0.8, psychedelic: 0.9 },  // Houston
+    'survival-market':     { hard: 1.2,  soft: 0.6, party: 0.7, pharma: 1.3, psychedelic: 0.8 },  // Detroit
+    'distribution-south':  { hard: 0.9,  soft: 0.8, party: 1.3, pharma: 1.0, psychedelic: 1.1 },  // Atlanta
+    'opioid-heavy':        { hard: 1.4,  soft: 1.0, party: 0.9, pharma: 0.6, psychedelic: 1.0 },  // Philly
+    'recreational-boom':   { hard: 1.3,  soft: 1.1, party: 1.5, pharma: 1.2, psychedelic: 0.7 },  // Vegas
+    'tech-money':          { hard: 1.2,  soft: 1.0, party: 1.1, pharma: 1.3, psychedelic: 0.6 }   // Seattle
+  };
+
   function generatePrices(game) {
     if (!game.prices) game.prices = {};
     ensurePriceHistory(game);
 
-    var cityHeatMod = 1 + (game.heat || 0) * 0.005;          // higher heat = slightly higher prices
-    var locationMod = (game.locationPriceModifier || 1);      // set by location module
-    var hour = game.hour || 12;
-    var isNight = hour >= 22 || hour < 5;
-    var dayProgression = 1 + ((game.day || 1) - 1) * 0.02;   // prices creep up 2% per day
+    // Get city-specific data for price differentiation
+    var currentCity = game.currentCity || (game.world && game.world.currentCity) || 'Miami';
+    var cityObj = null;
+    if (window.World && World.CITIES) {
+      cityObj = World.CITIES.find(function(c) { return c.name === currentCity; });
+    }
+    var cityEconomy = cityObj ? cityObj.economy : 'distribution-hub';
+    var cityEcoMods = CITY_ECONOMY_MODS[cityEconomy] || {};
+
+    // City heat affects prices (higher heat = risk premium)
+    var cityHeat = 0;
+    if (game.heat && typeof game.heat === 'object' && game.heat.cities) {
+      cityHeat = game.heat.cities[currentCity] || 0;
+    } else if (typeof game.heat === 'number') {
+      cityHeat = game.heat;
+    }
+    var cityHeatMod = 1 + cityHeat * 0.005;
+
+    var locationMod = (game.locationPriceModifier || 1);
+    var period = game.period || 'morning';
+    if (typeof period === 'number') {
+      period = ['morning','afternoon','night'][period] || 'morning';
+    }
+    var isNight = (period === 'night');
+    var dayProgression = 1 + ((game.day || 1) - 1) * 0.015;
 
     DRUG_NAMES.forEach(function (name) {
       var drug = DRUGS[name];
       var base = drug.base;
 
+      // City economy modifier — the main price differentiator between cities
+      var ecoMod = cityEcoMods[drug.category] || 1.0;
+
       // Time-of-day: party/club drugs get a night premium
       var timeMod = 1;
       if (isNight && (drug.category === 'party' || drug.category === 'psychedelic')) {
-        timeMod = 1.3;
+        timeMod = 1.35;
+      }
+      if (period === 'morning' && drug.category === 'soft') {
+        timeMod = 0.85;
       }
 
       // Supply/demand: if player has been selling a lot in this city, demand dips
       var demandMod = 1;
-      if (game.cityDemand && game.cityDemand[game.currentCity]) {
-        var sold = game.cityDemand[game.currentCity][name] || 0;
+      if (game.cityDemand && game.cityDemand[currentCity]) {
+        var sold = game.cityDemand[currentCity][name] || 0;
         demandMod = Math.max(0.5, 1 - sold * 0.01);
       }
 
@@ -244,7 +285,7 @@
         eventMod = game.priceMultipliers[name];
       }
 
-      var finalPrice = base * cityHeatMod * locationMod * timeMod * demandMod * swing * dayProgression * eventMod;
+      var finalPrice = base * ecoMod * cityHeatMod * locationMod * timeMod * demandMod * swing * dayProgression * eventMod;
       finalPrice = Math.max(Math.round(finalPrice), 1);
 
       game.prices[name] = finalPrice;
