@@ -852,7 +852,7 @@
 
   function borrowMoney(game, amount) {
     if (!game.debt) game.debt = 0;
-    var maxDebt = 50000;
+    var maxDebt = 100000;
 
     if (amount <= 0) return { success: false, message: 'Invalid amount.' };
     if (game.debt + amount > maxDebt) {

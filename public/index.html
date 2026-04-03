@@ -498,7 +498,9 @@ function renderLocations(){
   locs.forEach(loc=>{
     const div=document.createElement('div');div.className=`loc-card card${loc.locked?' locked':''}`;if(!loc.locked)div.onclick=()=>doVisitLocation(loc.id);
     const ti={block:'🏘️',trap:'🏚️',club:'🎵',docks:'🚢',safehouse:'🏠',strip:'🏙️'};let sk='';for(let i=0;i<5;i++)sk+=`<span class="skull${i<(loc.riskLevel||1)?' active':''}">💀</span>`;
-    div.innerHTML=`<div class="loc-type">${ti[loc.type]||'📍'} ${loc.type||''}</div><div class="loc-name">${loc.locked?'🔒 ':''}${loc.name}</div><div class="loc-desc">${loc.description||''}</div><div class="loc-risk">${sk}</div>`;
+    const pm=loc.priceModifier||1;const pmLabel=pm>1?`<span style="color:var(--neon-red);">💲 +${Math.round((pm-1)*100)}% prices</span>`:pm<1?`<span style="color:var(--neon-green);">💲 -${Math.round((1-pm)*100)}% prices</span>`:'<span style="color:var(--text-dim);">💲 Standard prices</span>';
+    const isCurrent=game.world.currentLocation===loc.name;
+    div.innerHTML=`<div class="loc-type">${ti[loc.type]||'📍'} ${loc.type||''}${isCurrent?' <span style="color:var(--neon-yellow);">📍 HERE</span>':''}</div><div class="loc-name">${loc.locked?'🔒 ':''}${loc.name}</div><div class="loc-desc">${loc.description||''}</div><div class="loc-meta" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">${pmLabel}<div class="loc-risk">${sk}</div></div>`;
     grid.appendChild(div);
   });
 }
@@ -574,8 +576,16 @@ function doTravel(cn){
     checkGameEvents();if(Audio)Audio.setMusicForContext('main');updateAll();switchTab('market');autoSave();},1500);
 }
 
-function doVisitLocation(id){if(!World)return;const r=World.visitLocation?World.visitLocation(game,id):null;if(r&&!r.success)return showMessage(r.msg,true);Core.advancePeriod(game);
-  if(Combat&&Combat.generateEncounter){const enc=Combat.generateEncounter(game,'location');if(enc){showEncounter(enc);return;}}checkGameEvents();updateAll();autoSave();}
+function doVisitLocation(id){if(!World)return;const r=World.visitLocation?World.visitLocation(game,id):null;if(r&&!r.success)return showMessage(r.msg,true);
+  // Apply location price modifier and regenerate prices
+  if(r&&r.priceModifier){game.locationPriceModifier=r.priceModifier;if(Economy)Economy.generatePrices(game);}
+  game.world.currentLocation=r&&r.location?r.location.name:id;
+  // Higher risk locations = higher encounter chance
+  const riskLevel=r&&r.riskLevel?r.riskLevel:1;
+  const encounterChance=0.05+riskLevel*0.08;
+  if(Combat&&Combat.generateEncounter&&Math.random()<encounterChance){const enc=Combat.generateEncounter(game,'location');if(enc){showEncounter(enc);return;}}
+  const modLabel=r&&r.priceModifier>1?` (prices ${Math.round((r.priceModifier-1)*100)}% higher here)`:r&&r.priceModifier<1?` (prices ${Math.round((1-r.priceModifier)*100)}% cheaper here)`:'';
+  showMessage((r?r.msg:'')+modLabel);checkGameEvents();updateAll();autoSave();}
 
 function doEndPeriod(){Core.advancePeriod(game);if(Economy)Economy.generatePrices(game);
   if(Story&&Story.rollRandomEvent){const ev=Story.rollRandomEvent(game);if(ev){showRandomEvent(ev);return;}}checkGameEvents();updateAll();autoSave();showMessage(`${(game.world.period||'morning').toUpperCase()}`);}
